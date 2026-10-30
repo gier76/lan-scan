@@ -6,7 +6,9 @@
 
     <application
         android:allowBackup="true"
-        android:label="LAN Scan">
+        android:label="Basti LAN Scan"
+        android:icon="@drawable/avatar"
+        android:roundIcon="@drawable/avatar">
         <activity
             android:name=".MainActivity"
             android:exported="true"

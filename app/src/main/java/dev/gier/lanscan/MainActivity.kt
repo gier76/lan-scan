@@ -1,8 +1,13 @@
 package dev.gier.lanscan
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -48,7 +53,7 @@ fun LanScanApp() {
     var prefix by remember { mutableStateOf(Scanner.subnetPrefix(Scanner.localIp())) }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("LAN Scan") }) },
+        topBar = { TopAppBar(title = { Text("Basti LAN Scan") }) },
     ) { padding ->
         Column(
             modifier = Modifier
@@ -154,14 +159,30 @@ fun DeviceCard(d: Device, expanded: Boolean, onToggle: () -> Unit) {
             if (d.openPorts.isNotEmpty()) {
                 Spacer(Modifier.height(4.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    val ctx = LocalContext.current
                     d.openPorts.sorted().forEach { p ->
+                        val url = if (p == 443) "https://${d.ip}:$p" else "http://${d.ip}:$p"
                         Surface(
                             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
                             shape = CircleShape,
                         ) {
                             Text(
                                 "$p",
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                modifier = Modifier
+                                    .padding(horizontal = 8.dp, vertical = 3.dp)
+                                    .clickable {
+                                        try {
+                                            ctx.startActivity(
+                                                Intent(Intent.ACTION_VIEW, Uri.parse(url)),
+                                            )
+                                        } catch (_: ActivityNotFoundException) {
+                                            Toast.makeText(
+                                                ctx,
+                                                "Kein Browser gefunden",
+                                                Toast.LENGTH_SHORT,
+                                            ).show()
+                                        }
+                                    },
                                 style = MaterialTheme.typography.labelSmall,
                                 fontFamily = FontFamily.Monospace,
                             )
